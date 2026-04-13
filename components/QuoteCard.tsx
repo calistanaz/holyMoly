@@ -6,9 +6,10 @@ import {
   Heart,
   Plus,
   Share,
-  UserRound
+  UserRound,
 } from "lucide-react-native";
-import { Text, View, ImageBackground } from "react-native";
+
+import { Text, View, ImageBackground, TouchableOpacity } from "react-native";
 
 type Quote = {
   id: string;
@@ -26,11 +27,13 @@ type Quote = {
     dislikes: number;
   };
 };
+
 type QuoteCardProps = {
   quote: Quote;
+  onOpenFilter: () => void;
 };
 
-export default function QuoteCard({ quote }: QuoteCardProps) {
+export default function QuoteCard({ quote, onOpenFilter }: QuoteCardProps) {
   return (
     <ImageBackground
       source={require("../assets/images/backgrounds/bg1.webp")}
@@ -40,13 +43,16 @@ export default function QuoteCard({ quote }: QuoteCardProps) {
       <View className="flex-1 bg-black/40">
         <View className="absolute top-6 left-0 right-0 flex-row justify-between px-6">
           <UserRound color="white" size={26} strokeWidth={1.5} />
-          <Funnel color="white" size={26} strokeWidth={1.5} />
+
+          <TouchableOpacity onPress={onOpenFilter}>
+            <Funnel color="white" size={26} />
+          </TouchableOpacity>
         </View>
 
         <View className="flex-1 justify-center items-center px-12">
           <Text
-            style={{ fontFamily: "Inter_400Light" }}
-            className="text-white font-semibold text-center text-2xl leading-relaxed tracking-wide"
+            style={{ fontFamily: "Inter_400Regular" }}
+            className="text-white text-center text-2xl leading-relaxed tracking-wide"
           >
             {quote.text}
           </Text>
@@ -66,7 +72,8 @@ export default function QuoteCard({ quote }: QuoteCardProps) {
             </View>
           )}
 
-          {quote.source?.name !== "Bhagavad Gita" &&
+          {quote.source?.name &&
+            quote.source?.name !== "Bhagavad Gita" &&
             quote.source?.name !== "Bible" && (
               <View className="mt-8 items-center">
                 <Text
@@ -88,6 +95,7 @@ export default function QuoteCard({ quote }: QuoteCardProps) {
           <Link href="/collection">
             <Boxes color="white" size={26} strokeWidth={1.5} />
           </Link>
+
           <View className="gap-6">
             <Earth color="white" size={26} strokeWidth={1.5} />
             <Share color="white" size={26} strokeWidth={1.5} />
