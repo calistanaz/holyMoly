@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Modal } from "react-native";
+import { Modal, Text, TouchableOpacity, View } from "react-native";
 
 const GENRES = [
   "Gita",
