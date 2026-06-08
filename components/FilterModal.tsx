@@ -1,8 +1,8 @@
-import { View, Text, TouchableOpacity, Modal } from "react-native";
 import { X } from "lucide-react-native";
 import { useTheme } from "@/context/ThemeContext";
 import { useThemeColors } from "@/hooks/useThemeColors";
 
+import { Modal, Text, TouchableOpacity, View } from "react-native";
 const GENRES = [
   "Gita",
   "Bible",
