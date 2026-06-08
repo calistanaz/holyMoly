@@ -1,5 +1,5 @@
-import * as ImagePicker from 'expo-image-picker';
-import React, { useState } from 'react';
+import * as ImagePicker from "expo-image-picker";
+import React, { useState } from "react";
 import {
   Alert,
   Image,
@@ -12,7 +12,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
+import { ArrowLeft } from "lucide-react-native";
+import { useTheme } from "@/context/ThemeContext";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 type PasswordVisibility = {
   old: boolean;
@@ -26,19 +29,78 @@ type PasswordFields = {
   confirm: string;
 };
 
-const EditProfileScreen: React.FC = () => {
+type Profile = {
+  username: string;
+  bio: string;
+  totalQuotes: number;
+  followers: number;
+  following: number;
+  currentStreak: number;
+  personalBest: number;
+  interests: string[];
+  quotes: string[];
+};
 
-  const [username, setUsername] = useState<string>('john_doe');
-  const [profilePhoto, setProfilePhoto] = useState<string>('https://i.pravatar.cc/150?img=3');
-  const [passwordModalVisible, setPasswordModalVisible] = useState<boolean>(false);
-  const [passwords, setPasswords] = useState<PasswordFields>({ old: '', new: '', confirm: '' });
-  const [showPassword, setShowPassword] = useState<PasswordVisibility>({ old: false, new: false, confirm: false });
-  const [passwordError, setPasswordError] = useState<string>('');
+type EditProfileProps = {
+  profile: Profile;
+  onUpdateProfile: React.Dispatch<React.SetStateAction<Profile>>;
+  onClose: () => void;
+};
+
+const EditProfile: React.FC<EditProfileProps> = ({
+  profile,
+  onUpdateProfile,
+  onClose,
+}) => {
+  const [profilePhoto, setProfilePhoto] = useState<string>(
+    "https://i.pravatar.cc/150?img=3",
+  );
+  const [interestInput, setInterestInput] = useState("");
+  const [passwordModalVisible, setPasswordModalVisible] =
+    useState<boolean>(false);
+  const [passwords, setPasswords] = useState<PasswordFields>({
+    old: "",
+    new: "",
+    confirm: "",
+  });
+  const [showPassword, setShowPassword] = useState<PasswordVisibility>({
+    old: false,
+    new: false,
+    confirm: false,
+  });
+  const [passwordError, setPasswordError] = useState<string>("");
+  const { toggleTheme, theme } = useTheme();
+  const colors = useThemeColors();
+
+  const addInterest = () => {
+    const trimmed = interestInput.trim();
+
+    if (!trimmed) return;
+
+    if (profile.interests.includes(trimmed)) return;
+
+    onUpdateProfile((prev) => ({
+      ...prev,
+      interests: [...prev.interests, trimmed],
+    }));
+
+    setInterestInput("");
+  };
+
+  const removeInterest = (interest: string) => {
+    onUpdateProfile((prev) => ({
+      ...prev,
+      interests: prev.interests.filter((i) => i !== interest),
+    }));
+  };
 
   const handlePickImage = async (): Promise<void> => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'Allow access to photos to change your profile picture.');
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Denied",
+        "Allow access to photos to change your profile picture.",
+      );
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -53,17 +115,20 @@ const EditProfileScreen: React.FC = () => {
   };
 
   const validatePassword = (password: string): string | null => {
-    if (password.length < 6) return 'Password must be at least 6 characters.';
-    if (!/[A-Z]/.test(password)) return 'Must contain at least 1 uppercase letter.';
-    if (!/[a-z]/.test(password)) return 'Must contain at least 1 lowercase letter.';
-    if (!/[0-9]/.test(password)) return 'Must contain at least 1 number.';
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return 'Must contain at least 1 special character.';
+    if (password.length < 6) return "Password must be at least 6 characters.";
+    if (!/[A-Z]/.test(password))
+      return "Must contain at least 1 uppercase letter.";
+    if (!/[a-z]/.test(password))
+      return "Must contain at least 1 lowercase letter.";
+    if (!/[0-9]/.test(password)) return "Must contain at least 1 number.";
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password))
+      return "Must contain at least 1 special character.";
     return null;
   };
 
   const handlePasswordChange = (): void => {
     if (!passwords.old) {
-      setPasswordError('Please enter your current password.');
+      setPasswordError("Please enter your current password.");
       return;
     }
     const validationError = validatePassword(passwords.new);
@@ -72,66 +137,229 @@ const EditProfileScreen: React.FC = () => {
       return;
     }
     if (passwords.new !== passwords.confirm) {
-      setPasswordError('New password and confirm password do not match.');
+      setPasswordError("New password and confirm password do not match.");
       return;
     }
     if (passwords.old === passwords.new) {
-      setPasswordError('New password must be different from old password.');
+      setPasswordError("New password must be different from old password.");
       return;
     }
-    setPasswordError('');
-    setPasswords({ old: '', new: '', confirm: '' });
+    setPasswordError("");
+    setPasswords({ old: "", new: "", confirm: "" });
     setPasswordModalVisible(false);
-    Alert.alert('Success', 'Password changed successfully!');
+    Alert.alert("Success", "Password changed successfully!");
   };
 
   const handleCloseModal = (): void => {
     setPasswordModalVisible(false);
-    setPasswords({ old: '', new: '', confirm: '' });
-    setPasswordError('');
+    setPasswords({ old: "", new: "", confirm: "" });
+    setPasswordError("");
     setShowPassword({ old: false, new: false, confirm: false });
   };
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1"
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        className="flex-1"
+        style={{ backgroundColor: colors.background }}
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingTop: 60,
+          paddingBottom: 40,
+        }}
+      >
+        <View className="flex-row items-center mb-8">
+          <TouchableOpacity
+            onPress={onClose}
+            className="w-10 h-10 rounded-full items-center justify-center"
+            style={{
+              backgroundColor: colors.card,
+              borderWidth: 1,
+              borderColor: colors.borderSecondary,
+            }}
+          >
+            <ArrowLeft size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
 
-        <Text style={styles.header}>Edit Profile</Text>
+          <Text
+            className="text-[24px] font-bold ml-4"
+            style={{ color: colors.textPrimary }}
+          >
+            Edit Profile
+          </Text>
+        </View>
 
-        <View style={styles.photoContainer}>
-          <Image source={{ uri: profilePhoto }} style={styles.avatar} />
-          <TouchableOpacity style={styles.changePhotoBtn} onPress={handlePickImage}>
-            <Text style={styles.changePhotoText}>Change Profile Photo</Text>
+        <View className="items-center mb-8">
+          <Image
+            source={{ uri: profilePhoto }}
+            className="w-[110px] h-[110px] rounded-full border-[3px] mb-3"
+            style={{ borderColor: colors.borderPrimary }}
+          />
+
+          <TouchableOpacity
+            className="py-1.5 px-4 rounded-full"
+            style={{
+              borderWidth: 1.5,
+              borderColor: colors.borderPrimary,
+            }}
+            onPress={handlePickImage}
+          >
+            <Text
+              className="text-sm font-semibold"
+              style={{ color: colors.accent }}
+            >
+              Change Profile Photo
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Username</Text>
+        <View className="mb-5">
+          <Text
+            className="text-[13px] font-semibold mb-1.5 uppercase tracking-[0.8px]"
+            style={{ color: colors.textSecondary }}
+          >
+            Username
+          </Text>
+
           <TextInput
-            style={styles.input}
-            value={username}
-            onChangeText={setUsername}
+            className="rounded-xl px-4 py-3 text-[15px]"
+            style={{
+              backgroundColor: colors.card,
+              borderWidth: 1.5,
+              borderColor: colors.borderSecondary,
+              color: colors.textPrimary,
+            }}
+            value={profile.username}
+            onChangeText={(text) =>
+              onUpdateProfile((prev) => ({
+                ...prev,
+                username: text,
+              }))
+            }
             placeholder="Enter new username"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textSecondary}
             autoCapitalize="none"
           />
         </View>
 
+        <View className="mb-5">
+          <Text
+            className="text-[13px] font-semibold mb-1.5 uppercase tracking-[0.8px]"
+            style={{ color: colors.textSecondary }}
+          >
+            Bio
+          </Text>
+
+          <TextInput
+            multiline
+            value={profile.bio}
+            onChangeText={(text) =>
+              onUpdateProfile((prev) => ({
+                ...prev,
+                bio: text,
+              }))
+            }
+            placeholder="Tell people about yourself..."
+            placeholderTextColor={colors.textSecondary}
+            className="rounded-xl px-4 py-4 min-h-[100px]"
+            style={{
+              backgroundColor: colors.card,
+              borderWidth: 1.5,
+              borderColor: colors.borderSecondary,
+              color: colors.textPrimary,
+              textAlignVertical: "top",
+            }}
+          />
+        </View>
+
+        <View className="mb-7">
+          <Text
+            className="text-[13px] font-semibold mb-3 uppercase tracking-[0.8px]"
+            style={{ color: colors.textSecondary }}
+          >
+            Interests
+          </Text>
+
+          <View className="flex-row gap-2">
+            <TextInput
+              value={interestInput}
+              onChangeText={setInterestInput}
+              placeholder="Add interest"
+              placeholderTextColor={colors.textSecondary}
+              className="flex-1 rounded-xl px-4 py-3"
+              style={{
+                backgroundColor: colors.card,
+                borderWidth: 1.5,
+                borderColor: colors.borderSecondary,
+                color: colors.textPrimary,
+              }}
+            />
+
+            <TouchableOpacity
+              onPress={addInterest}
+              className="px-5 rounded-xl justify-center"
+              style={{ backgroundColor: colors.accent }}
+            >
+              <Text
+                className="font-semibold"
+                style={{ color: colors.cardSecondary }}
+              >
+                Add
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View className="flex-row flex-wrap gap-2 mt-4">
+            {profile.interests.map((interest) => (
+              <TouchableOpacity
+                key={interest}
+                onPress={() => removeInterest(interest)}
+                className="px-4 py-2 rounded-full"
+                style={{
+                  backgroundColor: colors.card,
+                  borderWidth: 1,
+                  borderColor: colors.borderSecondary,
+                }}
+              >
+                <Text style={{ color: colors.textPrimary }}>{interest} ✕</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
         <TouchableOpacity
-          style={styles.passwordTriggerBtn}
+          className="mt-2 mb-7 py-3 rounded-xl items-center"
+          style={{
+            borderWidth: 1.5,
+            borderColor: colors.textTertiary,
+          }}
           onPress={() => setPasswordModalVisible(true)}
         >
-          <Text style={styles.passwordTriggerText}>Change Password</Text>
+          <Text
+            className="text-[15px] font-semibold"
+            style={{ color: colors.textTertiary }}
+          >
+            Change Password
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.saveBtn}
-          onPress={() => Alert.alert('Saved', 'Profile updated successfully!')}
+          className="py-4 rounded-[14px] items-center"
+          style={{ backgroundColor: colors.accent }}
+          onPress={() => {
+            Alert.alert("Success", "Profile updated successfully!");
+            onClose();
+          }}
         >
-          <Text style={styles.saveBtnText}>Save Changes</Text>
+          <Text
+            className="text-base font-bold tracking-[0.5px]"
+            style={{ color: colors.cardSecondary }}
+          >
+            Save Changes
+          </Text>
         </TouchableOpacity>
 
         <Modal
@@ -140,246 +368,116 @@ const EditProfileScreen: React.FC = () => {
           animationType="slide"
           onRequestClose={handleCloseModal}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalBox}>
+          <View className="flex-1 bg-black/50 justify-center items-center px-6">
+            <View
+              className="w-full rounded-[20px] p-6"
+              style={{ backgroundColor: colors.cardSecondary }}
+            >
+              <Text
+                className="text-xl font-bold mb-5 text-center"
+                style={{ color: colors.textPrimary }}
+              >
+                Change Password
+              </Text>
 
-              <Text style={styles.modalTitle}>Change Password</Text>
-
-              {(['old', 'new', 'confirm'] as (keyof PasswordFields)[]).map((field) => (
-                <View key={field} style={styles.passwordRow}>
-                  <TextInput
-                    style={styles.passwordInput}
-                    placeholder={
-                      field === 'old' ? 'Current Password' :
-                      field === 'new' ? 'New Password' :
-                      'Confirm New Password'
-                    }
-                    placeholderTextColor="#999"
-                    secureTextEntry={!showPassword[field]}
-                    value={passwords[field]}
-                    onChangeText={(text: string) => {
-                      setPasswords(prev => ({ ...prev, [field]: text }));
-                      setPasswordError('');
+              {(["old", "new", "confirm"] as (keyof PasswordFields)[]).map(
+                (field) => (
+                  <View
+                    key={field}
+                    className="flex-row items-center rounded-xl px-3.5 mb-3.5"
+                    style={{
+                      backgroundColor: colors.card,
+                      borderWidth: 1.5,
+                      borderColor: colors.borderSecondary,
                     }}
-                  />
-                  <TouchableOpacity
-                    onPress={() =>
-                      setShowPassword(prev => ({ ...prev, [field]: !prev[field] }))
-                    }
                   >
-                    <Text style={styles.eyeIcon}>{showPassword[field] ? '🙈' : '👁️'}</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
+                    <TextInput
+                      className="flex-1 py-3 text-[15px]"
+                      style={{ color: colors.textPrimary }}
+                      placeholder={
+                        field === "old"
+                          ? "Current Password"
+                          : field === "new"
+                            ? "New Password"
+                            : "Confirm New Password"
+                      }
+                      placeholderTextColor={colors.textSecondary}
+                      secureTextEntry={!showPassword[field]}
+                      value={passwords[field]}
+                      onChangeText={(text: string) => {
+                        setPasswords((prev) => ({ ...prev, [field]: text }));
+                        setPasswordError("");
+                      }}
+                    />
+                    <TouchableOpacity
+                      onPress={() =>
+                        setShowPassword((prev) => ({
+                          ...prev,
+                          [field]: !prev[field],
+                        }))
+                      }
+                    >
+                      <Text className="text-lg pl-2">
+                        {showPassword[field] ? "🙈" : "👁️"}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ),
+              )}
 
-              <Text style={styles.hintText}>
-                Min 6 chars · 1 uppercase · 1 lowercase · 1 number · 1 special character
+              <Text
+                className="text-[11px] text-center mb-2 leading-4"
+                style={{ color: colors.textSecondary }}
+              >
+                Min 6 chars · 1 uppercase · 1 lowercase · 1 number · 1 special
+                character
               </Text>
 
               {passwordError ? (
-                <Text style={styles.errorText}>{passwordError}</Text>
+                <Text
+                  className="text-[13px] text-center mb-3 font-medium"
+                  style={{ color: colors.textTertiary }}
+                >
+                  {passwordError}
+                </Text>
               ) : null}
 
-              <View style={styles.modalBtnRow}>
-                <TouchableOpacity style={styles.cancelBtn} onPress={handleCloseModal}>
-                  <Text style={styles.cancelBtnText}>Cancel</Text>
+              <View className="flex-row justify-between gap-3 mt-1">
+                <TouchableOpacity
+                  className="flex-1 py-3 rounded-xl items-center"
+                  style={{
+                    borderWidth: 1.5,
+                    borderColor: colors.borderSecondary,
+                  }}
+                  onPress={handleCloseModal}
+                >
+                  <Text
+                    className="text-[15px] font-semibold"
+                    style={{ color: colors.textSecondary }}
+                  >
+                    Cancel
+                  </Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.confirmBtn} onPress={handlePasswordChange}>
-                  <Text style={styles.confirmBtnText}>Confirm</Text>
+
+                <TouchableOpacity
+                  className="flex-1 py-3 rounded-xl items-center"
+                  style={{ backgroundColor: colors.accent }}
+                  onPress={handlePasswordChange}
+                >
+                  <Text
+                    className="text-[15px] font-bold"
+                    style={{ color: colors.cardSecondary }}
+                  >
+                    Confirm
+                  </Text>
                 </TouchableOpacity>
               </View>
-
             </View>
           </View>
         </Modal>
-
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: '#F9F9F9',
-    paddingHorizontal: 24,
-    paddingTop: 60,
-    paddingBottom: 40,
-  },
-  header: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 32,
-    textAlign: 'center',
-    letterSpacing: 0.5,
-  },
-  photoContainer: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  avatar: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    borderWidth: 3,
-    borderColor: '#4F63E7',
-    marginBottom: 12,
-  },
-  changePhotoBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#4F63E7',
-  },
-  changePhotoText: {
-    color: '#4F63E7',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  fieldContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#555',
-    marginBottom: 6,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-  },
-  input: {
-    backgroundColor: '#FFF',
-    borderWidth: 1.5,
-    borderColor: '#E0E0E0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: '#1A1A1A',
-  },
-  passwordTriggerBtn: {
-    marginTop: 8,
-    marginBottom: 28,
-    paddingVertical: 13,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#FF6B6B',
-    alignItems: 'center',
-  },
-  passwordTriggerText: {
-    color: '#FF6B6B',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  saveBtn: {
-    backgroundColor: '#4F63E7',
-    paddingVertical: 15,
-    borderRadius: 14,
-    alignItems: 'center',
-    shadowColor: '#4F63E7',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  saveBtnText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
-  modalBox: {
-    width: '100%',
-    backgroundColor: '#FFF',
-    borderRadius: 20,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 10,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  passwordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    borderWidth: 1.5,
-    borderColor: '#E0E0E0',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    marginBottom: 14,
-  },
-  passwordInput: {
-    flex: 1,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: '#1A1A1A',
-  },
-  eyeIcon: {
-    fontSize: 18,
-    paddingLeft: 8,
-  },
-  hintText: {
-    fontSize: 11,
-    color: '#999',
-    textAlign: 'center',
-    marginBottom: 8,
-    lineHeight: 16,
-  },
-  errorText: {
-    fontSize: 13,
-    color: '#FF3B30',
-    textAlign: 'center',
-    marginBottom: 12,
-    fontWeight: '500',
-  },
-  modalBtnRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginTop: 4,
-  },
-  cancelBtn: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#CCC',
-    alignItems: 'center',
-  },
-  cancelBtnText: {
-    color: '#666',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  confirmBtn: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 12,
-    backgroundColor: '#4F63E7',
-    alignItems: 'center',
-  },
-  confirmBtnText: {
-    color: '#FFF',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-});
-
-export default EditProfileScreen;
+export default EditProfile;

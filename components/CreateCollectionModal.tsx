@@ -2,6 +2,8 @@ import { View, Text, TouchableOpacity, TextInput, Modal } from "react-native";
 import { useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
 import { router } from "expo-router";
+import { useTheme } from "@/context/ThemeContext";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 type CreateCollectionModalProps = {
   visible: boolean;
@@ -18,6 +20,8 @@ const CreateCollectionModal = ({
 }: CreateCollectionModalProps) => {
   const [newName, setNewName] = useState("");
   const [error, setError] = useState(false);
+  const { toggleTheme, theme } = useTheme();
+  const colors = useThemeColors();
 
   useEffect(() => {
     if (!visible) {
@@ -62,8 +66,18 @@ const CreateCollectionModal = ({
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View className="flex-1 bg-black/40 justify-center px-6">
-        <View className="bg-[#111428] border border-white/10 rounded-2xl p-6">
-          <Text className="text-[#EAE6FF] text-lg font-semibold mb-4">
+        <View
+          className="rounded-2xl p-6"
+          style={{
+            backgroundColor: colors.cardSecondary,
+            borderWidth: 1,
+            borderColor: colors.borderSecondary,
+          }}
+        >
+          <Text
+            className="text-lg font-semibold mb-4"
+            style={{ color: colors.textPrimary }}
+          >
             New Collection
           </Text>
 
@@ -75,12 +89,21 @@ const CreateCollectionModal = ({
               setError(false);
             }}
             autoFocus
-            className="bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white mb-4"
-            placeholderTextColor="#666"
+            className="rounded-xl px-5 py-4 mb-4"
+            style={{
+              backgroundColor: colors.card,
+              borderWidth: 1,
+              borderColor: colors.borderSecondary,
+              color: colors.textPrimary,
+            }}
+            placeholderTextColor={colors.textSecondary}
           />
 
           {error && (
-            <Text className="text-red-500 text-sm mb-4">
+            <Text
+              className="text-sm mb-4"
+              style={{ color: colors.textTertiary }}
+            >
               Collection with this name already exists
             </Text>
           )}
@@ -88,16 +111,32 @@ const CreateCollectionModal = ({
           <View className="flex-row justify-end gap-5 mt-4">
             <TouchableOpacity
               onPress={onClose}
-              className="px-6 py-4 rounded-xl bg-white/5 border border-white/10"
+              className="px-6 py-4 rounded-xl"
+              style={{
+                backgroundColor: colors.card,
+                borderWidth: 1,
+                borderColor: colors.borderSecondary,
+              }}
             >
-              <Text className="text-white font-semibold">Cancel</Text>
+              <Text
+                className="font-semibold"
+                style={{ color: colors.textPrimary }}
+              >
+                Cancel
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={createCollection}
-              className="px-6 py-4 rounded-xl bg-[#C8B6FF]"
+              className="px-6 py-4 rounded-xl"
+              style={{ backgroundColor: colors.accent }}
             >
-              <Text className="text-[#1B1833] font-semibold">Create</Text>
+              <Text
+                className="font-semibold"
+                style={{ color: colors.cardSecondary }}
+              >
+                Create
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

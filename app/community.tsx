@@ -11,6 +11,8 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useMemo, useState } from "react";
+import { useTheme } from "@/context/ThemeContext";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 import {
   ArrowBigUp,
@@ -40,7 +42,6 @@ const starterPosts: Post[] = [
     userVote: null,
     createdAt: Date.now() - 1000,
   },
-
   {
     id: "2",
     username: "bala",
@@ -49,7 +50,6 @@ const starterPosts: Post[] = [
     userVote: null,
     createdAt: Date.now() - 2000,
   },
-
   {
     id: "3",
     username: "iONE",
@@ -62,18 +62,17 @@ const starterPosts: Post[] = [
 
 const Community = () => {
   const [tab, setTab] = useState<"trending" | "recent">("trending");
-
   const [posts, setPosts] = useState<Post[]>(starterPosts);
-
   const [showInput, setShowInput] = useState(false);
-
   const [input, setInput] = useState("");
+
+  const { toggleTheme, theme } = useTheme();
+  const colors = useThemeColors();
 
   const sortedPosts = useMemo(() => {
     if (tab === "trending") {
       return [...posts].sort((a, b) => b.votes - a.votes);
     }
-
     return [...posts].sort((a, b) => b.createdAt - a.createdAt);
   }, [posts, tab]);
 
@@ -96,11 +95,7 @@ const Community = () => {
           userVote = type;
         }
 
-        return {
-          ...p,
-          votes,
-          userVote,
-        };
+        return { ...p, votes, userVote };
       }),
     );
   };
@@ -118,24 +113,31 @@ const Community = () => {
     };
 
     setPosts((prev) => [newPost, ...prev]);
-
     setInput("");
     setShowInput(false);
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#05071A]">
-      <StatusBar barStyle="light-content" />
-
+    <SafeAreaView
+      style={{ backgroundColor: colors.background }}
+      className="flex-1"
+    >
+      <StatusBar
+        barStyle={theme === "dark" ? "light-content" : "dark-content"}
+      />
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
       >
         <View className="px-6 pb-6 pt-4">
-          <Text className="text-[#EAE6FF] text-3xl font-bold">Community</Text>
-
-          <Text className="text-[#9EA3C5] text-[12px]">
+          <Text
+            style={{ color: colors.textPrimary }}
+            className="text-3xl font-bold"
+          >
+            Community
+          </Text>
+          <Text style={{ color: colors.textSecondary }} className="text-[12px]">
             Discover quotes from the community
           </Text>
         </View>
@@ -144,21 +146,29 @@ const Community = () => {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => setTab("trending")}
-            className={`flex-1 rounded-md py-2 items-center flex-row justify-center gap-2 border ${
-              tab === "trending"
-                ? "bg-[#C8B6FF] border-[#C8B6FF]"
-                : "bg-white/5 border-white/10"
-            }`}
+            className="flex-1 rounded-md py-2 items-center flex-row justify-center gap-2 border"
+            style={{
+              backgroundColor: tab === "trending" ? colors.accent : colors.card,
+              borderColor:
+                tab === "trending"
+                  ? colors.borderPrimary
+                  : colors.borderSecondary,
+            }}
           >
             <Flame
               size={18}
-              color={tab === "trending" ? "#1B1833" : "#EAE6FF"}
+              color={
+                tab === "trending" ? colors.cardSecondary : colors.textPrimary
+              }
             />
-
             <Text
-              className={`text-base font-semibold ${
-                tab === "trending" ? "text-[#1B1833]" : "text-[#EAE6FF]"
-              }`}
+              style={{
+                color:
+                  tab === "trending"
+                    ? colors.cardSecondary
+                    : colors.textPrimary,
+              }}
+              className="text-base font-semibold"
             >
               Trending
             </Text>
@@ -167,21 +177,27 @@ const Community = () => {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => setTab("recent")}
-            className={`flex-1 rounded-md py-2 items-center flex-row justify-center gap-2 border ${
-              tab === "recent"
-                ? "bg-[#C8B6FF] border-[#C8B6FF]"
-                : "bg-white/5 border-white/10"
-            }`}
+            className="flex-1 rounded-md py-2 items-center flex-row justify-center gap-2 border"
+            style={{
+              backgroundColor: tab === "recent" ? colors.accent : colors.card,
+              borderColor:
+                tab === "recent"
+                  ? colors.borderPrimary
+                  : colors.borderSecondary,
+            }}
           >
             <Clock3
               size={18}
-              color={tab === "recent" ? "#1B1833" : "#EAE6FF"}
+              color={
+                tab === "recent" ? colors.cardSecondary : colors.textPrimary
+              }
             />
-
             <Text
-              className={`text-base font-semibold ${
-                tab === "recent" ? "text-[#1B1833]" : "text-[#EAE6FF]"
-              }`}
+              style={{
+                color:
+                  tab === "recent" ? colors.cardSecondary : colors.textPrimary,
+              }}
+              className="text-base font-semibold"
             >
               Recent
             </Text>
@@ -197,48 +213,82 @@ const Community = () => {
             paddingBottom: 80,
           }}
           renderItem={({ item }) => (
-            <View className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-5 overflow-hidden">
+            <View
+              className="rounded-2xl p-5 mb-5 overflow-hidden"
+              style={{
+                backgroundColor: colors.card,
+                borderWidth: 1,
+                borderColor: colors.borderSecondary,
+              }}
+            >
               <View className="absolute inset-0 bg-white/5 backdrop-blur-xl" />
 
-              <Text className="text-[#E4E0FF] text-[14px] leading-5">
+              <Text
+                style={{ color: colors.textPrimary }}
+                className="text-[14px] leading-5"
+              >
                 {item.text}
               </Text>
 
-              <Text className="text-[#B3AED6] text-[12px] text-right italic mt-2">
+              <Text
+                style={{ color: colors.textTertiary }}
+                className="text-[12px] text-right italic mt-2"
+              >
                 — {item.username}
               </Text>
 
               <View className="flex-row items-center justify-between mt-2">
-                <View className="flex-row items-center bg-white/5 border border-white/10 rounded-xl">
+                <View
+                  className="flex-row items-center rounded-xl"
+                  style={{
+                    borderWidth: 1,
+                    borderColor: colors.borderSecondary,
+                  }}
+                >
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => vote(item.id, "up")}
-                    className={`w-11 h-11 rounded-xl items-center justify-center ${
-                      item.userVote === "up" ? "bg-[#C8B6FF]" : "bg-transparent"
-                    }`}
+                    className="w-11 h-11 rounded-xl items-center justify-center"
+                    style={{
+                      backgroundColor:
+                        item.userVote === "up" ? colors.accent : "transparent",
+                    }}
                   >
                     <ArrowBigUp
                       size={18}
-                      color={item.userVote === "up" ? "#1B1833" : "#EAE6FF"}
+                      color={
+                        item.userVote === "up"
+                          ? colors.cardSecondary
+                          : colors.textPrimary
+                      }
                     />
                   </TouchableOpacity>
 
-                  <Text className="text-[#EAE6FF] text-sm font-bold mx-3">
+                  <Text
+                    style={{ color: colors.textPrimary }}
+                    className="text-sm font-bold mx-3"
+                  >
                     {item.votes}
                   </Text>
 
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => vote(item.id, "down")}
-                    className={`w-11 h-11 rounded-xl items-center justify-center ${
-                      item.userVote === "down"
-                        ? "bg-[#C8B6FF]"
-                        : "bg-transparent"
-                    }`}
+                    className="w-11 h-11 rounded-xl items-center justify-center"
+                    style={{
+                      backgroundColor:
+                        item.userVote === "down"
+                          ? colors.accent
+                          : "transparent",
+                    }}
                   >
                     <ArrowBigDown
                       size={18}
-                      color={item.userVote === "down" ? "#1B1833" : "#EAE6FF"}
+                      color={
+                        item.userVote === "down"
+                          ? colors.cardSecondary
+                          : colors.textPrimary
+                      }
                     />
                   </TouchableOpacity>
                 </View>
@@ -253,19 +303,34 @@ const Community = () => {
 
         {showInput ? (
           <View className="absolute inset-0 justify-center px-6 z-20">
-            <View className="bg-[#111428] border border-white/10 rounded-2xl p-5">
-              <Text className="text-[#EAE6FF] text-xl font-bold mb-5">
+            <View
+              className="rounded-2xl p-5"
+              style={{
+                backgroundColor: colors.cardSecondary,
+                borderWidth: 1,
+                borderColor: colors.borderSecondary,
+              }}
+            >
+              <Text
+                style={{ color: colors.textPrimary }}
+                className="text-xl font-bold mb-5"
+              >
                 Create Post
               </Text>
 
               <TextInput
                 placeholder="Share something inspiring..."
-                placeholderTextColor="#777"
+                placeholderTextColor={colors.textSecondary}
                 value={input}
                 onChangeText={setInput}
                 multiline
                 autoFocus
-                className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-base min-h-[120px]"
+                style={{
+                  color: colors.textPrimary,
+                  borderColor: colors.borderSecondary,
+                  backgroundColor: colors.card,
+                }}
+                className="rounded-2xl px-5 py-4 text-base min-h-[120px] border"
               />
 
               <View className="flex-row justify-end mt-5 gap-3">
@@ -274,16 +339,32 @@ const Community = () => {
                     setShowInput(false);
                     setInput("");
                   }}
-                  className="px-6 py-4 rounded-xl bg-white/5 border border-white/10"
+                  className="px-6 py-4 rounded-xl"
+                  style={{
+                    backgroundColor: colors.card,
+                    borderWidth: 1,
+                    borderColor: colors.borderSecondary,
+                  }}
                 >
-                  <Text className="text-white font-semibold">Cancel</Text>
+                  <Text
+                    style={{ color: colors.textPrimary }}
+                    className="font-semibold"
+                  >
+                    Cancel
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={createPost}
-                  className="px-6 py-4 rounded-xl bg-[#C8B6FF]"
+                  className="px-6 py-4 rounded-xl"
+                  style={{ backgroundColor: colors.accent }}
                 >
-                  <Text className="text-[#1B1833] font-bold">Post</Text>
+                  <Text
+                    style={{ color: colors.cardSecondary }}
+                    className="font-bold"
+                  >
+                    Post
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -292,9 +373,10 @@ const Community = () => {
           <TouchableOpacity
             activeOpacity={0.9}
             onPress={() => setShowInput(true)}
-            className="absolute bottom-8 right-6 w-16 h-16 rounded-full bg-[#C8B6FF] items-center justify-center shadow-2xl"
+            className="absolute bottom-8 right-6 w-16 h-16 rounded-full items-center justify-center shadow-2xl"
+            style={{ backgroundColor: colors.accent }}
           >
-            <Plus size={30} color="#1B1833" />
+            <Plus size={30} color={colors.cardSecondary} />
           </TouchableOpacity>
         )}
       </KeyboardAvoidingView>

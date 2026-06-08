@@ -5,11 +5,13 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
-  TextInput,
 } from "react-native";
 import { Settings } from "lucide-react-native";
 import { Link } from "expo-router";
 import { useState } from "react";
+import EditProfile from "@/components/EditProfile";
+import { useTheme } from "@/context/ThemeContext";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 type Profile = {
   username: string;
@@ -40,171 +42,266 @@ const initialProfile: Profile = {
 
 const Profile = () => {
   const [profile, setProfile] = useState<Profile>(initialProfile);
-
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const [editedUsername, setEditedUsername] = useState(profile.username);
-  const [editedBio, setEditedBio] = useState(profile.bio);
-  const [editedInterests, setEditedInterests] = useState(
-    profile.interests.join(", ")
-  );
-
-  const handleSave = () => {
-    setProfile({
-      ...profile,
-      username: editedUsername,
-      bio: editedBio,
-      interests: editedInterests
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean),
-    });
-
-    setModalVisible(false);
-  };
-
-  const openModal = () => {
-    setEditedUsername(profile.username);
-    setEditedBio(profile.bio);
-    setEditedInterests(profile.interests.join(", "));
-    setModalVisible(true);
-  };
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const { toggleTheme, theme } = useTheme();
+  const colors = useThemeColors();
 
   return (
     <>
       <ScrollView
-        className="flex-1 bg-[#05071A]"
+        className="flex-1"
+        style={{ backgroundColor: colors.background }}
         showsVerticalScrollIndicator={false}
       >
         <View className="px-6 pt-6 pb-10">
-
           <View className="flex-1 items-end">
             <Link href={"/settings"}>
-              <Settings color="white" size={26} strokeWidth={1.5} />
+              <Settings
+                color={colors.iconPrimary}
+                size={26}
+                strokeWidth={1.5}
+              />
             </Link>
           </View>
 
           <View className="items-center">
             <Image
               source={require("../assets/images/profile-pic/pfp-1.webp")}
-              className="w-36 h-36 rounded-full border-4 border-[#C8B6FF]"
+              className="w-36 h-36 rounded-full border-4"
+              style={{ borderColor: colors.borderPrimary }}
             />
 
-            <Text className="text-[#EAE6FF] text-4xl font-bold mt-6">
+            <Text
+              className="text-4xl font-bold mt-6"
+              style={{ color: colors.textPrimary }}
+            >
               {profile.username}
             </Text>
 
-            <Text className="text-[#B8B4D9] text-lg italic mt-2">
+            <Text
+              className="text-lg italic mt-2"
+              style={{ color: colors.textSecondary }}
+            >
               {profile.bio}
             </Text>
           </View>
 
-          <View className="flex-row justify-between bg-[#1A1D36] gap-5 rounded-xl px-6 py-5 mt-10">
+          <View
+            className="flex-row justify-between gap-5 rounded-xl px-6 py-5 mt-10"
+            style={{ backgroundColor: colors.cardSecondary }}
+          >
             <View className="items-center flex-1">
-              <Text className="text-[#F4F1FF] text-md">
+              <Text style={{ color: colors.textPrimary }}>
                 {profile.totalQuotes}
               </Text>
-              <Text className="text-[#B8B4D9] text-md mt-1">Posts</Text>
+              <Text
+                className="text-md mt-1"
+                style={{ color: colors.textSecondary }}
+              >
+                Posts
+              </Text>
             </View>
 
-            <View className="w-[1px] bg-[#3B3E5B]" />
+            <View
+              className="w-[1px]"
+              style={{ backgroundColor: colors.borderSecondary }}
+            />
 
             <View className="items-center flex-1">
-              <Text className="text-[#F4F1FF] text-md">
+              <Text className="text-md" style={{ color: colors.textPrimary }}>
                 {profile.followers}
               </Text>
-              <Text className="text-[#B8B4D9] text-md mt-1">Followers</Text>
+              <Text
+                className="text-md mt-1"
+                style={{ color: colors.textSecondary }}
+              >
+                Followers
+              </Text>
             </View>
 
-            <View className="w-[1px] bg-[#3B3E5B]" />
+            <View
+              className="w-[1px]"
+              style={{ backgroundColor: colors.borderSecondary }}
+            />
 
             <View className="items-center flex-1">
-              <Text className="text-[#F4F1FF] text-md">
+              {/* ✅ Fix: was hardcoded text-[#F4F1FF] */}
+              <Text className="text-md" style={{ color: colors.textPrimary }}>
                 {profile.following}
               </Text>
-              <Text className="text-[#B8B4D9] text-md mt-1">Following</Text>
+              <Text
+                className="text-md mt-1"
+                style={{ color: colors.textSecondary }}
+              >
+                Following
+              </Text>
             </View>
           </View>
 
           <TouchableOpacity
-            onPress={openModal}
-            className="bg-[#C8B6FF] rounded-full py-4 mt-8"
+            onPress={() => setShowEditProfile(true)}
+            className="rounded-full py-4 mt-8"
+            style={{ backgroundColor: colors.accent }}
           >
-            <Text className="text-[#1B1833] text-center text-md font-semibold">
+            <Text
+              className="text-center text-md font-semibold"
+              style={{ color: colors.textPrimary }}
+            >
               Edit Profile
             </Text>
           </TouchableOpacity>
 
-          <View className="bg-white/5 border border-white/10 rounded-xl p-6 mt-10 overflow-hidden">
-            <View className="absolute -top-10 -left-10 w-40 h-40 bg-[#7C5CFF]/20 rounded-full blur-3xl" />
-            <View className="absolute -bottom-5 -right-5 w-32 h-32 bg-[#C8B6FF]/10 rounded-full blur-3xl" />
+          <View
+            className="rounded-xl p-6 mt-10 overflow-hidden"
+            style={{
+              backgroundColor: colors.card,
+              borderWidth: 1,
+              borderColor: colors.borderSecondary,
+            }}
+          >
+            <View
+              className="absolute -top-10 -left-10 w-40 h-40 rounded-full blur-3xl"
+              style={{ backgroundColor: colors.borderPrimary + "33" }}
+            />
+            <View
+              className="absolute -bottom-5 -right-5 w-32 h-32 rounded-full blur-3xl"
+              style={{ backgroundColor: colors.accent + "1A" }}
+            />
             <View className="absolute inset-0 bg-white/5 backdrop-blur-xl" />
 
-            <Text className="text-[#EAE6FF] text-xl font-semibold mb-6">
+            <Text
+              className="text-xl font-semibold mb-6"
+              style={{ color: colors.textPrimary }}
+            >
               Stats
-              <Text className="text-[#EAE6FF]/70 text-sm"> (in days)</Text>
+              <Text className="text-sm" style={{ color: colors.textSecondary }}>
+                {" "}
+                (in days)
+              </Text>
             </Text>
 
             <View className="flex-row justify-around items-center">
               <View className="items-center">
-                <View className="w-24 h-24 rounded-full bg-white/10 border border-white/20 items-center justify-center">
-                  <View className="absolute inset-0 rounded-full bg-[#7C5CFF]/20" />
-
-                  <Text className="text-white text-3xl font-bold">
+                <View
+                  className="w-24 h-24 rounded-full items-center justify-center"
+                  style={{
+                    backgroundColor: colors.card,
+                    borderWidth: 1,
+                    borderColor: colors.borderSecondary,
+                  }}
+                >
+                  <View
+                    className="absolute inset-0 rounded-full"
+                    style={{ backgroundColor: colors.borderPrimary + "33" }}
+                  />
+                  <Text
+                    className="text-3xl font-bold"
+                    style={{ color: colors.textPrimary }}
+                  >
                     {profile.currentStreak}
                   </Text>
                 </View>
-
-                <Text className="text-[#EAE6FF] text-base font-semibold mt-3">
+                <Text
+                  className="text-base font-semibold mt-3"
+                  style={{ color: colors.textPrimary }}
+                >
                   Current
                 </Text>
               </View>
 
-              <View className="w-[1px] h-24 bg-white/10" />
+              <View
+                className="w-[1px] h-24"
+                style={{ backgroundColor: colors.borderSecondary }}
+              />
 
               <View className="items-center">
-                <View className="w-24 h-24 rounded-full bg-white/5 border border-white/20 items-center justify-center">
-                  <View className="absolute inset-0 rounded-full bg-[#C8B6FF]/10" />
-
-                  <Text className="text-[#EAE6FF] text-3xl font-bold">
+                <View
+                  className="w-24 h-24 rounded-full items-center justify-center"
+                  style={{
+                    backgroundColor: colors.card,
+                    borderWidth: 1,
+                    borderColor: colors.borderSecondary,
+                  }}
+                >
+                  <View
+                    className="absolute inset-0 rounded-full"
+                    style={{ backgroundColor: colors.accent + "1A" }}
+                  />
+                  <Text
+                    className="text-3xl font-bold"
+                    style={{ color: colors.textPrimary }}
+                  >
                     {profile.personalBest}
                   </Text>
                 </View>
-
-                <Text className="text-[#EAE6FF] text-base font-semibold mt-3">
+                <Text
+                  className="text-base font-semibold mt-3"
+                  style={{ color: colors.textPrimary }}
+                >
                   Best
                 </Text>
               </View>
             </View>
           </View>
 
-          <View className="bg-[#1A1D36] rounded-xl p-6 mt-10">
-            <Text className="text-[#EAE6FF] text-xl font-semibold mb-6">
+          <View
+            className="rounded-xl p-6 mt-10"
+            style={{ backgroundColor: colors.cardSecondary }}
+          >
+            <Text
+              className="text-xl font-semibold mb-6"
+              style={{ color: colors.textPrimary }}
+            >
               My Interests
             </Text>
-
             <View className="flex-row flex-wrap gap-4">
               {profile.interests.map((interest, index) => (
                 <View
                   key={index}
-                  className="bg-[#1A1D36] border border-[#343756] px-6 py-2 rounded-full"
+                  className="px-6 py-2 rounded-full"
+                  style={{
+                    backgroundColor: colors.cardSecondary,
+                    borderWidth: 1,
+                    borderColor: colors.borderSecondary,
+                  }}
                 >
-                  <Text className="text-[#EAE6FF] text-md">{interest}</Text>
+                  <Text
+                    className="text-md"
+                    style={{ color: colors.textPrimary }}
+                  >
+                    {interest}
+                  </Text>
                 </View>
               ))}
             </View>
           </View>
 
-          <View className="bg-white/5 border border-white/10 rounded-xl p-6 mt-10 overflow-hidden">
+          <View
+            className="rounded-xl p-6 mt-10 overflow-hidden"
+            style={{
+              backgroundColor: colors.card,
+              borderWidth: 1,
+              borderColor: colors.borderSecondary,
+            }}
+          >
             <View className="absolute inset-0 bg-white/5 backdrop-blur-xl" />
-
             <View className="flex-row justify-between items-center mb-6">
-              <Text className="text-[#EAE6FF] text-xl font-bold">
+              <Text
+                className="text-xl font-bold"
+                style={{ color: colors.textPrimary }}
+              >
                 Community Posts
               </Text>
 
-              <View className="bg-white/10 border border-white/10 px-3 py-1 rounded-full">
-                <Text className="text-[#C8B6FF] text-sm">
+              <View
+                className="px-3 py-1 rounded-full"
+                style={{
+                  backgroundColor: colors.card,
+                  borderWidth: 1,
+                  borderColor: colors.borderSecondary,
+                }}
+              >
+                <Text className="text-sm" style={{ color: colors.accent }}>
                   {profile.quotes.length} Quotes
                 </Text>
               </View>
@@ -213,24 +310,43 @@ const Profile = () => {
             {profile.quotes.map((quote, index) => (
               <View
                 key={index}
-                className="bg-white/5 border border-white/10 rounded-3xl p-5 mb-5 overflow-hidden"
+                className="rounded-3xl p-5 mb-5 overflow-hidden"
+                style={{
+                  backgroundColor: colors.card,
+                  borderWidth: 1,
+                  borderColor: colors.borderSecondary,
+                }}
               >
                 <View className="absolute inset-0 bg-white/5 backdrop-blur-lg" />
 
-                <Text className="text-[#7C5CFF] text-3xl leading-none">“</Text>
-
-                <Text className="text-[#E4E0FF] text-[15px] leading-7 italic">
+                <Text
+                  className="text-3xl leading-none"
+                  style={{ color: colors.accent }}
+                >
+                  "
+                </Text>
+                <Text
+                  className="text-[15px] leading-7 italic"
+                  style={{ color: colors.textPrimary }}
+                >
                   {quote}
                 </Text>
 
                 <View className="flex-row items-center mt-5">
-                  <View className="flex-1 h-[1px] bg-white/10" />
-
-                  <Text className="text-[#B3AED6] text-xs mx-3">
+                  <View
+                    className="flex-1 h-[1px]"
+                    style={{ backgroundColor: colors.borderSecondary }}
+                  />
+                  <Text
+                    className="text-xs mx-3"
+                    style={{ color: colors.textSecondary }}
+                  >
                     Quote #{index + 1}
                   </Text>
-
-                  <View className="flex-1 h-[1px] bg-white/10" />
+                  <View
+                    className="flex-1 h-[1px]"
+                    style={{ backgroundColor: colors.borderSecondary }}
+                  />
                 </View>
               </View>
             ))}
@@ -238,77 +354,13 @@ const Profile = () => {
         </View>
       </ScrollView>
 
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View className="flex-1 bg-black/70 justify-end">
-          <View className="bg-[#111428] rounded-t-[35px] px-6 pt-8 pb-10">
-            <Text className="text-[#EAE6FF] text-2xl font-bold mb-8">
-              Edit Profile
-            </Text>
-
-            <View className="mb-5">
-              <Text className="text-[#B8B4D9] mb-2">Username</Text>
-
-              <TextInput
-                value={editedUsername}
-                onChangeText={setEditedUsername}
-                placeholder="Enter username"
-                placeholderTextColor="#777"
-                className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white"
-              />
-            </View>
-
-            <View className="mb-5">
-              <Text className="text-[#B8B4D9] mb-2">Bio</Text>
-
-              <TextInput
-                value={editedBio}
-                onChangeText={setEditedBio}
-                placeholder="Enter bio"
-                placeholderTextColor="#777"
-                multiline
-                className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white"
-              />
-            </View>
-
-            <View className="mb-8">
-              <Text className="text-[#B8B4D9] mb-2">
-                Interests (comma separated)
-              </Text>
-
-              <TextInput
-                value={editedInterests}
-                onChangeText={setEditedInterests}
-                placeholder="Gaming, Reading..."
-                placeholderTextColor="#777"
-                className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white"
-              />
-            </View>
-
-            <View className="flex-row gap-4">
-              <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                className="flex-1 bg-white/5 border border-white/10 rounded-2xl py-4"
-              >
-                <Text className="text-white text-center font-semibold">
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleSave}
-                className="flex-1 bg-[#C8B6FF] rounded-2xl py-4"
-              >
-                <Text className="text-[#1B1833] text-center font-bold">
-                  Save
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+      <Modal visible={showEditProfile} animationType="slide">
+        <View className="flex-1">
+          <EditProfile
+            profile={profile}
+            onUpdateProfile={setProfile}
+            onClose={() => setShowEditProfile(false)}
+          />
         </View>
       </Modal>
     </>
