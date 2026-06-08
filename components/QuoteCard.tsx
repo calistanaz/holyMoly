@@ -98,7 +98,7 @@ export default function QuoteCard({ quote, onOpenFilter }: QuoteCardProps) {
   return (
     <>
       <ImageBackground
-        source={require("../assets/images/backgrounds/bg-1.webp")}
+        source={require("../assets/images/backgrounds/bg1.webp")}
         style={{ flex: 1 }}
         resizeMode="cover"
       >
