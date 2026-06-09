@@ -1,4 +1,7 @@
 import { X } from "lucide-react-native";
+import { useTheme } from "@/context/ThemeContext";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { Modal, Text, TouchableOpacity, View } from "react-native";
 const GENRES = [
   "Gita",
@@ -24,6 +27,9 @@ const FilterModal = ({
   selectedGenres,
   setSelectedGenres,
 }: Props) => {
+  const { toggleTheme, theme } = useTheme();
+  const colors = useThemeColors();
+
   const toggleGenre = (genre: string) => {
     if (selectedGenres.includes(genre)) {
       setSelectedGenres(selectedGenres.filter((g) => g !== genre));
@@ -45,15 +51,22 @@ const FilterModal = ({
       >
         <TouchableOpacity
           activeOpacity={1}
-          className="bg-[#05071A] rounded-t-3xl p-6 border-t-4 border-[#C8B6FF]"
+          className="rounded-t-3xl p-6 border-t-4"
+          style={{
+            backgroundColor: colors.background,
+            borderColor: colors.borderPrimary,
+          }}
         >
           <View className="flex-row justify-between items-center mb-10">
-            <Text className="text-white text-xl font-semibold">
+            <Text
+              className="text-xl font-semibold"
+              style={{ color: colors.textPrimary }}
+            >
               Filter By Genre
             </Text>
 
             <TouchableOpacity onPress={onClose}>
-              <X color="white" size={24} />
+              <X color={colors.iconPrimary} size={24} />
             </TouchableOpacity>
           </View>
 
@@ -65,14 +78,20 @@ const FilterModal = ({
                 <TouchableOpacity
                   key={genre}
                   onPress={() => toggleGenre(genre)}
-                  className={`px-4 py-2 rounded-full border ${
-                    isSelected
-                      ? "bg-[#C8B6FF] border-[#C8B6FF]"
-                      : "bg-white/5 border-white/10"
-                  }`}
+                  className="px-4 py-2 rounded-full border"
+                  style={{
+                    backgroundColor: isSelected ? colors.accent : colors.card,
+                    borderColor: isSelected
+                      ? colors.borderPrimary
+                      : colors.borderSecondary,
+                  }}
                 >
                   <Text
-                    className={`${isSelected ? "text-[#1B1833]" : "text-[#EAE6FF]"}`}
+                    style={{
+                      color: isSelected
+                        ? colors.cardSecondary
+                        : colors.textPrimary,
+                    }}
                   >
                     {genre}
                   </Text>
@@ -84,16 +103,36 @@ const FilterModal = ({
           <View className="flex-row justify-between items-center mb-6">
             <TouchableOpacity
               onPress={resetFilters}
-              className="bg-white/5 border border-white/10 px-5 py-2 rounded-full"
+              className="px-5 py-2 rounded-full"
+              style={{
+                backgroundColor: colors.card,
+                borderWidth: 1,
+                borderColor: colors.borderSecondary,
+              }}
             >
-              <Text className="text-[#EAE6FF] font-semibold">Reset</Text>
+              <Text
+                className="font-semibold"
+                style={{ color: colors.textPrimary }}
+              >
+                Reset
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={onClose}
-              className="bg-[#C8B6FF] border border-[#C8B6FF] px-5 py-2 rounded-full"
+              className="px-5 py-2 rounded-full"
+              style={{
+                backgroundColor: colors.accent,
+                borderWidth: 1,
+                borderColor: colors.borderPrimary,
+              }}
             >
-              <Text className="text-[#1B1833] font-semibold">Apply</Text>
+              <Text
+                className="font-semibold"
+                style={{ color: colors.cardSecondary }}
+              >
+                Apply
+              </Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>

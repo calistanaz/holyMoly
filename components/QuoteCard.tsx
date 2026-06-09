@@ -25,6 +25,8 @@ import ViewShot from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
 
 import CreateCollectionModal from "@/components/CreateCollectionModal";
+import { useTheme } from "@/context/ThemeContext";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 type Quote = {
   id: string;
@@ -55,14 +57,15 @@ type QuoteCardProps = {
 
 export default function QuoteCard({ quote, onOpenFilter }: QuoteCardProps) {
   const [showCollectionModal, setShowCollectionModal] = useState(false);
-
   const [createCollectionModal, setCreateCollectionModal] = useState(false);
-
   const [collections, setCollections] = useState<Collection[]>([
     { id: "1", name: "Motivation" },
     { id: "2", name: "Life Lessons" },
     { id: "3", name: "❤️ Favorites" },
   ]);
+  
+  const { toggleTheme, theme } = useTheme();
+  const colors = useThemeColors();
 
   const viewShotRef = useRef<ViewShot>(null);
 
@@ -182,32 +185,50 @@ export default function QuoteCard({ quote, onOpenFilter }: QuoteCardProps) {
           onPress={() => setShowCollectionModal(false)}
         >
           <Pressable
-            className="bg-[#05071A] rounded-t-3xl border-t-4 border-[#C8B6FF] px-6 pt-6 pb-10"
+            className="rounded-t-3xl border-t-4 px-6 pt-6 pb-10"
+            style={{
+              backgroundColor: colors.background,
+              borderColor: colors.borderPrimary,
+            }}
             onPress={(e) => e.stopPropagation()}
           >
             <View className="flex-row justify-between items-center mb-6">
-              <Text className="text-white text-xl font-semibold">
+              <Text
+                className="text-xl font-semibold"
+                style={{ color: colors.textPrimary }}
+              >
                 Save Quote
               </Text>
 
               <TouchableOpacity onPress={() => setShowCollectionModal(false)}>
-                <X color="white" size={24} />
+                <X color={colors.iconPrimary} size={24} />
               </TouchableOpacity>
             </View>
 
             <TouchableOpacity
-              className="bg-white/5 border border-white/10 rounded-2xl py-4 px-4 mb-5"
+              className="rounded-2xl py-4 px-4 mb-5"
+              style={{
+                backgroundColor: colors.card,
+                borderWidth: 1,
+                borderColor: colors.borderSecondary,
+              }}
               onPress={() => {
                 setShowCollectionModal(false);
                 setCreateCollectionModal(true);
               }}
             >
-              <Text className="text-[#EAE6FF] text-center font-semibold">
+              <Text
+                className="text-center font-semibold"
+                style={{ color: colors.textPrimary }}
+              >
                 + Create New Collection
               </Text>
             </TouchableOpacity>
 
-            <Text className="text-zinc-400 mb-3 text-sm">
+            <Text
+              className="mb-3 text-sm"
+              style={{ color: colors.textSecondary }}
+            >
               Existing Collections
             </Text>
 
@@ -218,9 +239,13 @@ export default function QuoteCard({ quote, onOpenFilter }: QuoteCardProps) {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   onPress={() => handleAddToCollection(item.id, item.name)}
-                  className="bg-[#C8B6FF] rounded-2xl px-4 py-4 mb-3"
+                  className="rounded-2xl px-4 py-4 mb-3"
+                  style={{ backgroundColor: colors.accent }}
                 >
-                  <Text className="text-[#1B1833] text-base font-semibold">
+                  <Text
+                    className="text-base font-semibold"
+                    style={{ color: colors.cardSecondary }}
+                  >
                     {item.name}
                   </Text>
                 </TouchableOpacity>
